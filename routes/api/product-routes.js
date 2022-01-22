@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 // GET /api/products/id
 router.get('/:id', async (req, res) => {
   try {
-    const dbProductData = await Product.findAll({
+    const dbProductData = await Product.findOne({
       where: { id: req.params.id },
       include: [{ model: Category }, { model: Tag, through: ProductTag }]
     });
@@ -106,8 +106,19 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
+  try {
+    const dbProductData = await Product.destroy({
+      where: { id: req.params.id }
+    });
+    !dbProductData
+      ? res.status(404).json({ message: 'Product not found' })
+      : res.json(dbProductData);
+  } catch (err) {
+    res.status(500).json(err);
+    console.log(err);
+  }
 });
 
 module.exports = router;
